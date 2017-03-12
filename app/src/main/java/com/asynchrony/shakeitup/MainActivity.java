@@ -5,25 +5,20 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.LruCache;
 
 import com.google.common.collect.EvictingQueue;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.subjects.BehaviorSubject;
-import rx.subjects.PublishSubject;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,16 +29,13 @@ public class MainActivity extends AppCompatActivity {
     private final BehaviorSubject<Float> yPosition = BehaviorSubject.create();
     private final BehaviorSubject<Float> zPosition = BehaviorSubject.create();
     private SensorEventListener sensorEventListener;
-    private Subscription subscription;
+    private Disposable subscription;
     private AudioPlayer audioPlayer;
-    private EvictingQueue<Float> events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        events = EvictingQueue.create(EVENT_COUNT);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -70,30 +62,59 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        final Sensor gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        Log.i(getClass().getSimpleName(), "default gyro: " + gyroSensor.getName());
-        sensorManager.registerListener(sensorEventListener, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
+//        final Sensor gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//        Log.i(getClass().getSimpleName(), "default gyro: " + gyroSensor.getName());
+//        sensorManager.registerListener(sensorEventListener, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        subscription = Observable.combineLatest(xPosition, yPosition, zPosition, (x, y, z) -> Math.abs(x) + Math.abs(y) + Math.abs(z))
+//        subscription = Observable.combineLatest(xPosition, yPosition, zPosition, (x, y, z) -> Math.abs(x) + Math.abs(y) + Math.abs(z))
+//                .subscribeOn(Schedulers.computation())
+//                .sample(20, TimeUnit.MILLISECONDS)
+//                .scan(EvictingQueue.create(EVENT_COUNT), (BiFunction<EvictingQueue<Float>, Float, EvictingQueue<Float>>) (objects, aFloat) -> {
+//                    objects.add(aFloat);
+//                    return objects;
+//                }).map(floats -> {
+//                    float sum = 0;
+//                    for(Float foo : floats){
+//                        sum += foo;
+//                    }
+//                    return sum/ EVENT_COUNT;
+//                })
+//                .observeOn(Schedulers.newThread())
+//                .subscribe(weightedMagnitude -> {
+//                    Log.e("Music", "weighted magnitude was " + weightedMagnitude);
+//                    if(weightedMagnitude != null && weightedMagnitude > 1){
+//                        audioPlayer.play();
+//                    } else {
+//                        audioPlayer.pause();
+//                    }
+//                });
+
+        final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        subscription = Observable.combineLatest(xPosition, yPosition, zPosition, (x, y, z) -> (x    * x + y * y + z * z))
+                .subscribeOn(Schedulers.computation())
                 .sample(20, TimeUnit.MILLISECONDS)
-                .map(list -> list)
-                .map(rawMagnitude -> {
-                    events.add(rawMagnitude);
+                .scan(EvictingQueue.create(EVENT_COUNT), (BiFunction<EvictingQueue<Float>, Float, EvictingQueue<Float>>) (objects, aFloat) -> {
+                    objects.add(aFloat);
+                    return objects;
+                }).map(floats -> {
                     float sum = 0;
-                    for(Float foo : events){
+                    for(Float foo : floats){
                         sum += foo;
                     }
                     return sum/ EVENT_COUNT;
                 })
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.newThread())
                 .subscribe(weightedMagnitude -> {
                     Log.e("Music", "weighted magnitude was " + weightedMagnitude);
-                    if(weightedMagnitude != null && weightedMagnitude > 3){
+                    if(weightedMagnitude != null && weightedMagnitude > 225){
                         audioPlayer.play();
                     } else {
                         audioPlayer.pause();
                     }
                 });
+
     }
 
     @Override
@@ -102,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
 
         sensorManager.unregisterListener(sensorEventListener);
 
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
+        if (subscription != null && !subscription.isDisposed()) {
+            subscription.dispose();
         }
     }
 
