@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        classpath 'me.tatarka:gradle-retrolambda:3.6.0'
     }
 }
 
@@ -15,7 +15,7 @@ android {
     buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "com.asynchrony.shakeitup"
-        minSdkVersion 21
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -40,8 +40,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.2.0'
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava:1.2.2'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
     compile 'com.google.guava:guava:20.0'
     testCompile 'junit:junit:4.12'
 }
