@@ -41,6 +41,13 @@ buildscript {
 compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 compile 'io.reactivex.rxjava2:rxjava:2.0.1'
 ```
+- In the Android block of your build.gradle add the following compile options. 
+```
+compileOptions {
+    targetCompatibility 1.8
+    sourceCompatibility 1.8
+}
+```
 - Clean and compile your app. Test it and ensure everything is still working.
 
 ### Checkpoint 3 - Make observables of the Accelerometers X,Y, and Z values.
