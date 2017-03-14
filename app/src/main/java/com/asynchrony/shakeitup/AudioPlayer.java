@@ -7,7 +7,7 @@ import android.support.annotation.RawRes;
 public class AudioPlayer {
     private MediaPlayer mediaPlayer;
 
-    public void create(Context context, @RawRes int resourceId){
+    public void init(Context context, @RawRes int resourceId){
         if(mediaPlayer == null){
             mediaPlayer = MediaPlayer.create(context, resourceId);
         }
@@ -28,9 +28,9 @@ public class AudioPlayer {
 
     public void destroy(){
         if(mediaPlayer != null){
+            mediaPlayer.pause();
             mediaPlayer.release();
             mediaPlayer = null;
-
         }
     }
 }
