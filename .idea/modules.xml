@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ShakeItUp.iml" filepath="$PROJECT_DIR$/ShakeItUp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ShakeItUpCodelab.iml" filepath="$PROJECT_DIR$/ShakeItUpCodelab.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
