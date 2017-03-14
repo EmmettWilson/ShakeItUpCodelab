@@ -2,7 +2,7 @@
 
 ### Overview
 
-RxJava is a Functional Reactive Paradigm. It is essentially the Observer pattern, but taken to the extreme. In the simplest of cases you have observables and observers. The real power of Reactive Extensions comes from chaining observables in a functional paradigm. This requires a bit of a mind shift from standard Object oriented programming so do not expect to full grok it today. The goal of this codelab is to play with RxJava a bit using a fun project. Hopefully by the end you will see a little bit of the power that RxJava provides to Android Development. Some of the things that will will touch on briefly include:
+RxJava is a Functional Reactive Paradigm. It is essentially the Observer pattern, but taken to the extreme. In the simplest of cases you have standard observables and observers. The real power of Reactive Extensions comes from chaining observables in a functional paradigm. This requires a bit of a mind shift from standard Object oriented programming so do not expect to fully grok it today. The goal of this codelab is to play with RxJava a bit using a fun project. Hopefully by the end you will see a little bit of the power that RxJava provides to Android Development. Some of the things that we will touch on briefly include:
 
 - How to turn a callback into an observable using a `Subject`
 - How to take multiple observables and combine the results into a cohesive unit.
@@ -14,9 +14,9 @@ The Codelab starts intentionally slow. Everyone leaving should have a finished a
 
 ### Checkpoint 0 - Bootstrap an application
 
-- Open android studio and update everything. Either click on Help->Check for updates if a project is open, or Configurations -> Check for updates if a project is not open.  
+- Open Android Studio and update everything. Either click on Help->Check for updates if a project is open, or Configurations -> Check for updates if a project is not open.  
 - Create a new android project. Target api 19+ and choose empty activity.  
-- Navigate to AndroidManifest.xml and declare your activity as fixed to portrait orientation (For simplicity sake we will do all our work in this activity and do not wish it to rotate. As an exercise later you can extract logic to a background service).  
+- Navigate to AndroidManifest.xml and declare your activity as fixed to portrait orientation (For simplicity sake we will do all our work in this activity and do not wish it to rotate. As an exercise later you can extract logic to a background service that will persist accross configuration change and allow playing music while the app is backgrounded).  
 ```xml
         <activity android:name=".MainActivity"
                 android:screenOrientation="portrait" >
