@@ -8,30 +8,16 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.google.common.collect.EvictingQueue;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.AbstractQueue;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 
@@ -40,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     public static final int EVENT_COUNT = 10;
+    public static final int MUSIC_THRESHOLD = 15 * 15;
     private AudioPlayer audioPlayer;
     private final BehaviorSubject<Float> xValue = BehaviorSubject.create();
     private final BehaviorSubject<Float> yValue = BehaviorSubject.create();
@@ -61,9 +48,10 @@ public class MainActivity extends AppCompatActivity {
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(final SensorEvent event) {
+                Log.e(TAG, "" + event.timestamp);
                 xValue.onNext(event.values[0]);
-                xValue.onNext(event.values[1]);
-                xValue.onNext(event.values[2]);
+                yValue.onNext(event.values[1]);
+                zValue.onNext(event.values[2]);
             }
 
             @Override
@@ -80,9 +68,13 @@ public class MainActivity extends AppCompatActivity {
         final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
+        //Combine the latest x, y, and z sensor values and emit the combination as a list of Floats.
         disposable = Observable.combineLatest(xValue, yValue, zValue, (x, y, z) -> Arrays.asList(x, y, z))
-                .subscribeOn(Schedulers.computation())
+                //Sample the latest event every 20 seconds to limit backpressure
                 .sample(20, TimeUnit.MILLISECONDS)
+                //From here on go to the computation thread
+                .subscribeOn(Schedulers.computation())
+                //Turn the list of Floats into a Magnitude
                 .map(floats -> {
                     float magnitude = 0;
                     for(Float aFloat : floats){
@@ -90,20 +82,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                     return magnitude;
                 })
+                //Accumulate the last 10 magnitude events in an Evicting Queue
                 .scan(EvictingQueue.create(EVENT_COUNT), (BiFunction<EvictingQueue<Float>, Float, EvictingQueue<Float>>) (objects, aFloat) -> {
                     objects.add(aFloat);
                     return objects;
-                }).map(floats -> {
+                })
+                //Take the last accumulated events and calculate an average
+                .map(floats -> {
                     float sum = 0;
                     for(Float foo : floats){
                         sum += foo;
                     }
                     return sum/ EVENT_COUNT;
                 })
+                //Move onto a new thread to interact with the music player
                 .observeOn(Schedulers.newThread())
                 .subscribe(weightedMagnitude -> {
                     Log.e("Music", "weighted magnitude was " + weightedMagnitude);
-                    if(weightedMagnitude != null && weightedMagnitude > 225){
+                    if (weightedMagnitude != null && weightedMagnitude > MUSIC_THRESHOLD) {
                         audioPlayer.play();
                     } else {
                         audioPlayer.pause();
