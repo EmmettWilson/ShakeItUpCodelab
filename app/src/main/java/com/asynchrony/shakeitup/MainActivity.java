@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         sensorEventListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(final SensorEvent event) {
@@ -75,8 +73,10 @@ public class MainActivity extends AppCompatActivity {
                 //No op
             }
         };
+        final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        Disposable disposable = xValue.subscribe(new Consumer<Float>() {
+        disposable = xValue.subscribe(new Consumer<Float>() {
             @Override
             public void accept(Float aFloat) throws Exception {
                 Log.i(TAG, "Received xValue " + aFloat);
