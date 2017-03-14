@@ -162,3 +162,12 @@ disposable = Observable.combineLatest(xValue, yValue, zValue, (x, y, z) -> Array
 - Create a home screen widget that displays if the app is tracking movement. Allow the user to toggle it from there
 - Sense different types of movement and play a different sound file (ex Walking, Cycling, Runnning, Jumping)
 - Make an Android Things music player, using an accelerometer and speaker.
+
+### Further reading and resources.
+
+- Dan Lew made a great series of posts about the basics of RxJava. I visit his posts often as I am working and come accross new questions. Be aware that some of the methods called have changed with the advent of RxJava2, but many of the ideas are still relevant. http://blog.danlew.net/2014/09/15/grokking-rxjava-part-1/
+- Marble diagrams are a great way to visualize how some the Rx operators function on an observable. Many of the most common operators are covered here http://rxmarbles.com/
+- Get info straight from the horses mouth and visit http://reactivex.io/ . This is usually not my first stop, but is definitely the most comprehensive.
+- Rx-Ify your views using Jake Wharton's RxBindings library. This is also great to read to help understand how to turn an external dependency into an observable. https://github.com/JakeWharton/RxBinding
+- Rx-ify your SQLite3 database. https://github.com/square/sqlbrite
+- Rx-ify your networking stack using Retrofit RxAdapters. This is really useful for combining requests, chaining requests, mapping responses, error handling etc. How often do we have to do mashups of several Api's?! https://github.com/square/retrofit/tree/master/retrofit-adapters/rxjava
