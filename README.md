@@ -10,7 +10,7 @@ RxJava is a Functional Reactive Paradigm. It is essentially the Observer pattern
 - How to mutate data by chaining Observables in a functional way. (Do not hold state)
 - A grab bag of operators.
 
-The Codelab starts intentionally slow. Everyone leaving should have a finished app that plays music only while the user is dancing within an hour or so. For those more advanced or wanting to explore more there are open ended further steps at the end. Feel free to move ahead at your own pace.
+The Codelab starts intentionally slow. Everyone leaving should have a finished app that plays music only while the user is dancing within an hour or so. For those more advanced or wanting to explore more there are open ended further steps at the end. Feel free to move ahead at your own pace. If you get stuck don't worry. There is a corresponding branch for each checkpoint in this repo. Feel free to checkout the code and look through the commit history. I tried to keep them super small and targeted. 
 
 ### Checkpoint 0 - Bootstrap an application
 
