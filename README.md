@@ -42,3 +42,40 @@ compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 compile 'io.reactivex.rxjava2:rxjava:2.0.1'
 ```
 - Clean and compile your app. Test it and ensure everything is still working.
+
+### Checkpoint 3 - Make observables of the Accelerometers X,Y, and Z values.
+
+In this step we will be taking a callback provided by an external dependency and turn it into a stream of events using a `PublishSubject`. While not necessary we will be creating an Observable for the emmited x, y , and z values. This will allow us to demonstrate one of the most useful Operators for Android Development. 
+
+- Using the following lines of code register a listener to the accelerometer.
+```java
+sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+sensorEventListener = new SensorEventListener() {
+    @Override
+    public void onSensorChanged(final SensorEvent event) {
+    }
+
+   @Override
+   public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
+   }
+};
+```
+- Create three `PublishSubject`'s in your activity using the `PublishSubject.create()` method.
+- In the `onSensorChanged` method publish the events to your `PublishSubject` using the `onNext()` method with each of your sensor values.
+- In on Start you can now subscribe to one of your `PublishSubject`'s like so
+```java       
+Disposable disposable = xValue.subscribe(new Consumer<Float>() {
+               @Override
+               public void accept(Float aFloat) throws Exception {
+                   Log.i(MainActivity.class.getSimpleName(), "Received xValue " + aFloat);
+               }
+           });`
+```
+- Make sure you dispose of your disposable in the appropriate lifecycle method to ensure we do not have a memory leak. When using sensors this is important because the service is longer lived than our activity.
+- If Retrolambda is correctly configured you can the reduce this to a lambda using alt+enter
+```java 
+disposable = xValue.subscribe(aFloat -> Log.i(TAG, "Received xValue " + aFloat));
+```
+- At this point you should be observing the xValues emitted by the accelerometer and logging them to the android monitor. Run the app and (carefully) shake your phone to ensure they are correctly being emitted. 
