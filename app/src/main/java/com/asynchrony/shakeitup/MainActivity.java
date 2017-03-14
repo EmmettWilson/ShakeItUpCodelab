@@ -76,12 +76,7 @@ public class MainActivity extends AppCompatActivity {
         final Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
 
-        disposable = xValue.subscribe(new Consumer<Float>() {
-            @Override
-            public void accept(Float aFloat) throws Exception {
-                Log.i(TAG, "Received xValue " + aFloat);
-            }
-        });
+        disposable = xValue.subscribe(aFloat -> Log.i(TAG, "Received xValue " + aFloat));
     }
 
     @Override
