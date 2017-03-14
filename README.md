@@ -96,13 +96,69 @@ Disposable disposable = xValue.subscribe(new Consumer<Float>() {
 disposable = xValue.subscribe(aFloat -> Log.i(TAG, "Received xValue " + aFloat));
 ```
 - At this point you should be observing the xValues emitted by the accelerometer and logging them to the android monitor. Run the app and (carefully) shake your phone to ensure they are correctly being emitted.
+
+### Checkpoint 4 - RxJava All the Things! 
+
+In this step we will use a functional reactive paradigm to do the following while holding no state in our activity.
+1. Combine the latest emission from our three observables into a single event.
+2. Sample these events every N milliseconds to ensure we can process the output before the next event hits (see Backpressure)
+3. Move to the computation thread because we are going to crunch some numbers
+4. Calculate a moving weighted average with the squared magnitude of the last 10 events
+5. Move onto a new thread strictly dedicated to interacting with the Music Player
+6. If the weighted average is above a reasonable threshold for activity play the music. Otherwise pause it.
  
- 
+So instead of a guided walkthrough let's just look at the code. Take a few minutes and try to grasp what is going on here, and ponder the power of using RxJava over doing the same work in a callback.
+
+```java
+//Combine the latest x, y, and z sensor values and emit the combination as a list of Floats.
+disposable = Observable.combineLatest(xValue, yValue, zValue, (x, y, z) -> Arrays.asList(x, y, z))
+                //Sample the latest event every 20 seconds to limit backpressure
+                .sample(20, TimeUnit.MILLISECONDS)
+                //From here on go to the computation thread
+                .subscribeOn(Schedulers.computation())
+                //Turn the list of Floats into a Magnitude
+                .map(floats -> {
+                    float magnitude = 0;
+                    for(Float aFloat : floats){
+                        magnitude += aFloat * aFloat;
+                    }
+                    return magnitude;
+                })
+                //Accumulate the last 10 magnitude events in an Evicting Queue (you can write one if you are against Guava)
+                .scan(EvictingQueue.create(EVENT_COUNT), (BiFunction<EvictingQueue<Float>, Float, EvictingQueue<Float>>) (objects, aFloat) -> {
+                    objects.add(aFloat);
+                    return objects;
+                })
+                //Take the last accumulated events and calculate an average
+                .map(floats -> {
+                    float sum = 0;
+                    for(Float foo : floats){
+                        sum += foo;
+                    }
+                    return sum/ EVENT_COUNT;
+                })
+                //Move onto a new thread to interact with the music player
+                .observeOn(Schedulers.newThread())
+                .subscribe(weightedMagnitude -> {
+                    Log.e("Music", "weighted magnitude was " + weightedMagnitude);
+                    if (weightedMagnitude != null && weightedMagnitude > MUSIC_THRESHOLD) {
+                        audioPlayer.play();
+                    } else {
+                        audioPlayer.pause();
+                    }
+                });
+
+```
+ # Congrats you made an app. Time to dance and socialize! (or keep hacking and make something even cooler)
+
+
 ### Next Steps:  A few Ideas
 
 - Turn you MusicPlayer into an observable that emits progress for the mp3. Show progress on screen as the user plays the file. 
 - Adjust the volume of the device track based on the vigor of the shake.
 - Show mp3's in a recycler view. Allow user to select which mp3 they wish to listen to.
 - Move the music player out of the activity and into a background service. Allowing the music to be played while the screen is off.
+- Show a persistent notification when the user has opened the app. Allow them to turn off activity sensing from it.
+- Create a home screen widget that displays if the app is tracking movement. Allow the user to toggle it from there
 - Sense different types of movement and play a different sound file (ex Walking, Cycling, Runnning, Jumping)
 - Make an Android Things music player, using an accelerometer and speaker.
