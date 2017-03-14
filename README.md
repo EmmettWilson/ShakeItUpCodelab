@@ -14,3 +14,12 @@
          ```
     4. Create a "raw" resources directory by right-clicking src/main/res and selecting new resource directory.
     5. Add one or more of you favorite .mp3 files to the raw folder. Ensure the file names are snake cased (b/c that is what we do with resource files)  
+
+### Checkpoint 1 - Implement a music player that plays and pauses an mp3 on button clicks.
+
+    1.) Add two buttons to your activities layout with text for play and pause.
+    2.) Implement a `MusicPlayer` that wraps and android Media player instance. Give it lifecycle methods for create, destroy, play and pause.
+    3.) Play and Pause functionality of the music player should not interact with the `MediaPlayer` if it is currently playing or paused respectively. (This will be important later)
+    4.) Initialize your 'MusicPlayer' on the activities onCreate() method and release it onDestroy.
+    5.) Give a View.OnClickListener() to each of the buttons that performs the play and pause functionality on the music player.
+    6.) Test your implementation.
